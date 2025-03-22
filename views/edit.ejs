@@ -10,7 +10,7 @@
     <% layout('layouts/boilerplate') -%>
 
     <h1>Edit Page</h1>
-    <form method="POST" action="/listings/<%= Listing.id %>?_method=PUT"   class="row g-3 needs-validation" novalidate>
+    <form method="POST" action="/listings/<%= Listing.id %>?_method=PUT"   class="row g-3 needs-validation" novalidate enctype="multipart/form-data">
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <!-- <input type="text" name="listings[title]" id="title" placeholder="<%= Listing.title %>" class="form-control" required /> -->
@@ -28,15 +28,17 @@
             <div class="invalid-feedback" id="descriptionFeedback">Description is required.</div>
         </div>
 
-
-
+        <div class="mb-3">
+            <img src="<%= originalImageUrl %>" alt="" height="200px">
+        </div>
+        
         <!-- img -->
         <div class="mb-3">
-            <label for="image" class="form-label">Image</label>
+            <label for="image" class="form-label">Upload Image</label>
          
 
-            <input type="text" name="image" id="" value="<%=Listing.image.url %>">
-            <div class="invalid-feedback" id="descriptionFeedback">Description is required.</div>
+            <input type="file" name="listings[image]" id=""  class="form-control" >
+            <!-- <div class="invalid-feedback" id="descriptionFeedback">Description is required.</div> -->
         </div>
         
 

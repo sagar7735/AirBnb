@@ -1,3 +1,7 @@
+if(process.env.NODE_ENV !="production"){
+    require("dotenv").config()
+
+}
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -12,6 +16,8 @@ const listingRoute=require("./routes/listing.js")
 const reviewRoute=require("./routes/review.js");
 const userRoute=require("./routes/user.js")
 const session=require("express-session");
+const MongoStore = require('connect-mongo');
+
 const flash = require("connect-flash");
 const passport = require("passport"); 
 const LocalStrategy=require("passport-local");
@@ -23,13 +29,24 @@ const methodOverride = require("method-override")
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "/public/css")))
 // app.use(express.static(path.join(__dirname, "/public/js")))
-
+let dbUrl=process.env.ATLASDB_URL
 const ejsMate = require("ejs-mate");
 app.engine('ejs', ejsMate);
 
+const store=MongoStore.create({
+    mongoUrl:dbUrl,
+    crypto:{
+secret:process.env.SECRET,
+    },
+    touchAfter: 24 * 3600,
+});
 
+store.on("error",()=>{
+    console.log("ERROR IN MONGO SESSION STORE")
+})
 const sessionOption={
-    secret:"mysupersecretcode",
+    store,
+    secret:process.env.SECRET,
     resave:false,
     saveUninitialized:true,
     cookie:{
@@ -46,23 +63,24 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()))
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
+// var dbUrl=process.env.ATLASDB_URL
 
 main().then((res) => {
     console.log("connected to DB")
 }).catch((err) => { console.log("err") })
 async function main() {
-    await mongoose.connect("mongodb://127.0.0.1:27017/wanderlust")
+    // await mongoose.connect("mongodb://127.0.0.1:27017/wanderlust")
+await mongoose.connect(dbUrl)
 }
 
-app.get("/", (req, res) => {
-    res.send("server is active")
-})
+// app.get("/", (req, res) => {
+//     res.send("server is active")
+// })
 
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
-
+res.locals.currUser=req.user;
     next()
 })
 app.get("/demouser", async(req,res,next)=>{
