@@ -5,7 +5,7 @@ if(process.env.NODE_ENV !="production"){
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const port = 8000;
+const port = 5000;
 const listing = require("./models/listing.js")
 const path = require("path");
 const wrapAsync = require("./utils/wrapAsync.js")
@@ -65,17 +65,25 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 // var dbUrl=process.env.ATLASDB_URL
 
-main().then((res) => {
-    console.log("connected to DB")
-}).catch((err) => { console.log("err") })
-async function main() {
-    // await mongoose.connect("mongodb://127.0.0.1:27017/wanderlust")
-await mongoose.connect(dbUrl)
-}
+// main().then((res) => {
+//     console.log("connected to DB")
+// }).catch((err) => { console.log("err") })
+// async function main() {
+//     await mongoose.connect("mongodb://127.0.0.1:27017/wanderlust")
+// // await mongoose.connect(dbUrl)
+// }
 
 // app.get("/", (req, res) => {
 //     res.send("server is active")
 // })
+
+
+
+mongoose.connect(process.env.ATLASDB_URL, {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true
+  }).then(() => console.log("Connected to DB"))
+    .catch(err => console.error("Error connecting to DB:", err));
 
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
@@ -83,15 +91,15 @@ app.use((req,res,next)=>{
 res.locals.currUser=req.user;
     next()
 })
-app.get("/demouser", async(req,res,next)=>{
-let fakeuser=new User( {
-    email:"kumafsdfr@1s23gmail.com",
-    username:"aswini"
-});
- let registerUser=await User.register(fakeuser,"helloworld")
-res.send(registerUser);
-next()
-})
+// app.get("/demouser", async(req,res,next)=>{
+// let fakeuser=new User( {
+//     email:"kumafsdfr@1s23gmail.com",
+//     username:"aswini"
+// });
+//  let registerUser=await User.register(fakeuser,"helloworld")
+// res.send(registerUser);
+// next()
+// })
 
 // const validateReview = (req, res, next) => {
 //     let { error } = reviewSchema.validate(req.body);
@@ -110,6 +118,14 @@ app.use("/",userRoute)
 
 
 
+// app.get("/listings/:id/book",(req,res,next)=>{
+// let {id}=req.params;
+// console.log("book route")
+
+// res.send("sucess").redirect("/listings")
+//     next()
+// })
+
 
 
 
@@ -126,6 +142,7 @@ app.use((err, req, res, next) => {
     // res.status(statusCode).send(message);
     res.status(statusCode).render("error.ejs", { message })
 });
+
 
 
 app.listen(port, () => {
