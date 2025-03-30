@@ -61,8 +61,11 @@ app.use(flash())
 app.use(passport.initialize())
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()))
+
+
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
 // var dbUrl=process.env.ATLASDB_URL
 
 // main().then((res) => {
@@ -109,6 +112,15 @@ res.locals.currUser=req.user;
 //     }
 //     next(); // This should always run after the if block if there's no error
 // };
+
+app.use(async (req, res, next) => {
+    if (!req.session) {
+        return next(new Error("Session not loaded"));
+    }
+    res.locals.currUser = req.user || null;
+    next();
+});
+
 
 app.use("/listings",listingRoute)
 app.use("/listings/:id/reviews",reviewRoute)
